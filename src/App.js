@@ -60,7 +60,7 @@ const App = () => {
   };
 
   const handleLogin = async (address) => {
-    const baseUrl = "http://localhost:4000";
+    const baseUrl = "http://18.143.150.128:4000"; // "http://localhost:4000";
     const response = await axios.get(`${baseUrl}/message?address=${address}`);
     const messageToSign = response?.data?.messageToSign;
 
