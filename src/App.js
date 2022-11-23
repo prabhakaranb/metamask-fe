@@ -26,6 +26,7 @@ const auth = getAuth(app);
 const App = () => {
   const [loading, setLoading] = useState(false);
   const [address, setAddress] = useState("");
+  const [balance, setBalance] = useState("");
 
   const onPressConnect = async () => {
     setLoading(true);
@@ -83,12 +84,13 @@ const App = () => {
 
     console.log(customToken)
 
-    const balance = await window.ethereum.request({
+    await window.ethereum.request({
       method: 'eth_getBalance',
       params: [address, 'latest']
     }).then(balance => {
       // Return string value to convert it into int balance
     console.log(balance) 
+    setBalance(balance)
       
     // Yarn add ethers for using ethers utils or
     // npm install ethers
@@ -114,6 +116,16 @@ const App = () => {
           loading={loading}
           address={address}
         />
+      <table>
+        <tr>
+          <td>Address</td>
+          <td><input type="text" value={address} style={{ width: 500 }} /></td>
+        </tr>
+        <tr>
+          <td style={{color: '#FFFFFF'}}>Balance</td>
+          <td><input type="text" value={balance} style={{ width: 200 }} /></td>
+        </tr>
+      </table>
       </header>
     </div>
   );
