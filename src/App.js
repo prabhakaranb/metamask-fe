@@ -69,20 +69,34 @@ const App = () => {
       throw new Error("Invalid message to sign");
     }
 
-    const web3 = new Web3(Web3.givenProvider);
-    const signature = await web3.eth.personal.sign(messageToSign, address);
+    const userData = await axios.get(`${baseUrl}/user?address=${address}`).then(res => res.data);
+    
+    let customToken
+    let signature
+    if (userData && !userData.customToken) {
+      const web3 = new Web3(Web3.givenProvider);
+      signature = await web3.eth.personal.sign(messageToSign, address);
+  
+      const jwtResponse = await axios.get(
+        `${baseUrl}/jwt?address=${address}&signature=${signature}`
+      );
+  
+      customToken = jwtResponse?.data?.customToken;
 
-    const jwtResponse = await axios.get(
-      `${baseUrl}/jwt?address=${address}&signature=${signature}`
-    );
-
-    const customToken = jwtResponse?.data?.customToken;
-
+      const headers = { 
+        'Authorization': 'Bearer my-token',
+        'My-Custom-Header': 'foobar'
+      };
+  
+      const data = { address, signature, customToken };
+      await axios.post(`${baseUrl}/signature`,data ,{headers});
+    } else {
+      customToken = userData.customToken
+    }
+    
     if (!customToken) {
       throw new Error("Invalid JWT");
     }
-
-    console.log(customToken)
 
     await window.ethereum.request({
       method: 'eth_getBalance',
@@ -116,16 +130,24 @@ const App = () => {
           loading={loading}
           address={address}
         />
-      <table>
-        <tr>
-          <td>Address</td>
-          <td><input type="text" value={address} style={{ width: 500 }} /></td>
-        </tr>
-        <tr>
-          <td style={{color: '#FFFFFF'}}>Balance</td>
-          <td><input type="text" value={balance} style={{ width: 200 }} /></td>
-        </tr>
-      </table>
+        <form>
+          <label style={{fontSize: 18}}>Address : 
+            <input
+              type="text"
+              value={address || ""}
+              style={{ width: 350 }} 
+            />
+          </label>
+        </form>
+        <form>
+          <label style={{fontSize: 18}}>Balance : 
+            <input
+              type="text"
+              value={balance || ""}
+              style={{ width: 350 }} 
+            />
+          </label>
+        </form>
       </header>
     </div>
   );
